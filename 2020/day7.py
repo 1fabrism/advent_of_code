@@ -67,9 +67,6 @@ class Bag(object):
     
     def addChild(self, child):
         self.children.append(child)
-    
-    def deleteChild(self, child):
-        self.children.remove(child)
 
 
 def count_bags(bag):
@@ -97,15 +94,9 @@ def search_rules(bag_name, input):
 
 with open("day7_input.txt", 'r') as file:
     input = file.readlines()
-    for rule in input:
-        if rule.startswith("shiny gold "):
-            shiny_gold = Bag(rule.split()[0]+' '+rule.split()[1])
-            shiny_gold.quantity = 1
-            for index,word in enumerate(rule.split()):
-                if word.isdigit():
-                    child_bag = Bag(rule.split()[index+1]+' '+rule.split()[index+2])
-                    child_bag.quantity = int(word)
-                    shiny_gold.addChild(child_bag)
+    shiny_gold = Bag("shiny gold")
+    shiny_gold.quantity = 1
+    parse_rule(shiny_gold, input)
     all_children = shiny_gold.children.copy()
     while all_children:
         for child in all_children:
