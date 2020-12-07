@@ -72,44 +72,48 @@ class Bag(object):
         self.children.remove(child)
 
 
-def count_children(bag):
-    print(bag.name)
+def count_bags(bag):
     counter = 0
     for child in bag.children:
-        counter += count_children(child)
+        counter += count_bags(child)
     return counter * bag.quantity + bag.quantity
 
 
-with open("day7_input2.txt", 'r') as file:
-    bags = []
+def parse_rule(bag, input):
+    rule = search_rules(bag.name, input)
+    if " no " not in rule:
+        for index,word in enumerate(rule.split()):
+            if word.isdigit():
+                child_bag = Bag(rule.split()[index+1]+' '+rule.split()[index+2])
+                child_bag.quantity = int(word)
+                bag.addChild(child_bag)
+
+
+def search_rules(bag_name, input):
+    for line in input:
+        if line.startswith(bag_name):
+            return line
+
+
+with open("day7_input.txt", 'r') as file:
     input = file.readlines()
     for rule in input:
-        new_bag = Bag(rule.split()[0]+' '+rule.split()[1])
-        if " no " not in rule:
+        if rule.startswith("shiny gold "):
+            shiny_gold = Bag(rule.split()[0]+' '+rule.split()[1])
+            shiny_gold.quantity = 1
             for index,word in enumerate(rule.split()):
                 if word.isdigit():
                     child_bag = Bag(rule.split()[index+1]+' '+rule.split()[index+2])
                     child_bag.quantity = int(word)
-                    new_bag.addChild(child_bag)
-        bags.append(new_bag)
-    search = ["shiny gold"]
-    active_bag = "shiny gold"
-
-
-    search = ["shiny gold"]
-    sum = 0
-    for search_item in search:
-        for bag in bags:
-            if bag.name == search_item:
-                sum += count_children(bag,bags)
-    print(sum)
-    """
-    input = file.readlines()
-    search = ["shiny gold"]
-    total = 0
-    while search:
-        for line in input:
-            if line.startswith(bag):
-    """
-
+                    shiny_gold.addChild(child_bag)
+    all_children = shiny_gold.children.copy()
+    while all_children:
+        for child in all_children:
+            parse_rule(child, input)
+            if child.children:
+                all_children += child.children
+            all_children.remove(child)
+                    
+    counter = count_bags(shiny_gold)
+    print(counter-1)
 
