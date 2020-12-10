@@ -104,17 +104,74 @@ with open("day10_input.txt", 'r') as file:
 
 
 """
+--- Part Two ---
 
+To completely determine whether you have enough adapters, you'll need to figure out how many different ways they can be arranged. Every arrangement needs to connect the charging outlet to your device. The previous rules about when adapters can successfully connect still apply.
+
+The first example above (the one that starts with 16, 10, 15) supports the following arrangements:
+
+(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
+(0), 1, 4, 5, 6, 7, 10, 12, 15, 16, 19, (22)
+(0), 1, 4, 5, 7, 10, 11, 12, 15, 16, 19, (22)
+(0), 1, 4, 5, 7, 10, 12, 15, 16, 19, (22)
+(0), 1, 4, 6, 7, 10, 11, 12, 15, 16, 19, (22)
+(0), 1, 4, 6, 7, 10, 12, 15, 16, 19, (22)
+(0), 1, 4, 7, 10, 11, 12, 15, 16, 19, (22)
+(0), 1, 4, 7, 10, 12, 15, 16, 19, (22)
+
+(The charging outlet and your device's built-in adapter are shown in parentheses.) Given the adapters from the first example, the total number of arrangements that connect the charging outlet to your device is 8.
+
+The second example above (the one that starts with 28, 33, 18) has many arrangements. Here are a few:
+
+(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, (52)
+
+(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 49, (52)
+
+(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+32, 33, 34, 35, 38, 39, 42, 45, 46, 48, 49, (52)
+
+(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+32, 33, 34, 35, 38, 39, 42, 45, 46, 49, (52)
+
+(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+32, 33, 34, 35, 38, 39, 42, 45, 47, 48, 49, (52)
+
+(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+46, 48, 49, (52)
+
+(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+46, 49, (52)
+
+(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+47, 48, 49, (52)
+
+(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+47, 49, (52)
+
+(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+48, 49, (52)
+
+In total, this set of adapters can connect the charging outlet to your device in 19208 distinct arrangements.
+
+You glance back down at your bag and try to remember why you brought so many adapters; there must be more than a trillion valid ways to arrange them! Surely, there must be an efficient way to count the arrangements.
+
+What is the total number of distinct ways you can arrange the adapters to connect the charging outlet to your device?
+
+Your puzzle answer was 1973822685184.
 """
 
 # PART 2:
-with open("day10_input2.txt", 'r') as file:
-    input = ["0"]
+with open("day10_input.txt", 'r') as file:
+    input = ["0"]       # add the zero joltage from the outlet
     input += file.readlines()
     input = [int(line.rstrip('\n')) for line in input]
     input.sort()
-    input.append(input[-1]+3)
-    paths = []
+    input.append(input[-1]+3)       # add built-in adapter joltage
+
+    # For each adapter we have, store the number of possible paths it can generate
+    # 1, 2 or 3 depending on the values of the next three adapters.
     nodes = []
     for index,adapter in enumerate(input[:-1]):
         n_options = 0
@@ -124,9 +181,25 @@ with open("day10_input2.txt", 'r') as file:
                     n_options += 1
             except(IndexError):
                 pass
-        nodes.append(n_options)
+        nodes.append(n_options)    
+
+    # Starting from the back (inverted_nodes), multiply each number in the list.
+    # However, if the number is 3 or 2, it means we're partially skipping the nodes
+    # immediately after and, in the case of 3, also 2 nodes over. Therefore, I take 
+    # away the number of paths that we "missed out" on because of these skips
     result = 1
-    for n in nodes:
+    cumul_result = []
+    inverted_nodes = nodes[::-1]
+    for i,n in enumerate(inverted_nodes):
+        cumul_result.append(result)
         result *= n
+        if n == 3:
+            if inverted_nodes[i-1] != 1:
+                result -= inverted_nodes[i-1] * cumul_result[i-2]
+            if inverted_nodes[i-2] != 1:
+                result -= inverted_nodes[i-2] * cumul_result[i-3]
+        if n == 2:
+            if inverted_nodes[i-1] != 1:
+                result -= inverted_nodes[i-1] * cumul_result[i-2]
     print(result)
 
