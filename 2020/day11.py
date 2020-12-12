@@ -287,6 +287,20 @@ def get_adjacents2(map, i, k):
     return adjacents
 
 
+def update_map2(old_map):
+    # Same as part 1, but use get_adjacents2()
+    for i,line in enumerate(old_map):
+        for k,seat in enumerate(line):
+            if seat == 'L':
+                adjacents = get_adjacents2(old_map, i, k)
+                if '#' not in adjacents:
+                    new_map[i] = new_map[i][0:k] + '#' + new_map[i][k+1: ]
+            elif seat == '#':
+                adjacents = get_adjacents(old_map, i, k)
+                if adjacents.count('#') >= 4:
+                    new_map[i] = new_map[i][0:k] + 'L' + new_map[i][k+1: ]
+
+
 with open("day11_input.txt", 'r') as file:
     input = file.readlines()
     input = [line.rstrip('\n') for line in input]
@@ -295,7 +309,7 @@ with open("day11_input.txt", 'r') as file:
     # The code here is the same as part one. The only difference is in 
     # the function to get the adjacent seats.
     while True:
-        update_map(old_map)
+        update_map2(old_map)
         if new_map == old_map:
             break
         old_map = new_map.copy()
