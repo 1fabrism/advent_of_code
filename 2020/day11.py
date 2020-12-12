@@ -96,6 +96,7 @@ Your puzzle answer was 2470.
 
 # PART 1:
 def get_adjacents(map, i, k):
+    # Given a seat with coordinates i and k, look at the 8 seats surrounding it:
     adjacents = []
     for y in range(k-1, k+2):
         for x in range(i-1, i+2):
@@ -105,6 +106,9 @@ def get_adjacents(map, i, k):
 
 
 def update_map(old_map):
+    # For each seat in each line, look at what are the 8 adjacent seats and 
+    # apply the rules according to whether the currently selected seat is free
+    # or occupied:
     for i,line in enumerate(old_map):
         for k,seat in enumerate(line):
             if seat == 'L':
@@ -122,21 +126,20 @@ with open("day11_input.txt", 'r') as file:
     input = [line.rstrip('\n') for line in input]
     old_map = input.copy()
     new_map = input.copy()
-    counter = 0
-    # go through map, update seats accordingly
+    # Update the new map, check if it's still the same as the previous iteration.
+    # If yes, simulation has stabilized so break the loop. If no, copy the new 
+    # map into the old one and repeat:
     while True:
         update_map(old_map)
         if new_map == old_map:
             break
         old_map = new_map.copy()
-        counter += 1
 
-    # go through current map to count number of '#'
+    # Go through latest map to count number of occupied seats:
     occupied = 0
     for line in new_map:
         occupied += line.count('#')
     print(occupied)
-    print(counter)
 
 
 
@@ -263,9 +266,12 @@ Your puzzle answer was 2259.
 
 # PART 2:
 def get_adjacents2(map, i, k):
+    # Given a seat with coordinates i and k, move from those coordinates 
+    # in each direction until you reach a seat. X is positive from left 
+    # to right, Y is positive from top to bottom. e.g.(0,-1) is up
     directions = [(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1)]
     adjacents = []
-    x = i
+    x = i           # throwaway coordinates
     y = k
     for direction in directions:
         x += direction[0]
@@ -276,22 +282,9 @@ def get_adjacents2(map, i, k):
                 break
             x += direction[0]
             y += direction[1]
-        x = i
+        x = i       # reset x and y for next direction to be tested
         y = k
     return adjacents
-
-
-def update_map2(old_map):
-    for i,line in enumerate(old_map):
-        for k,seat in enumerate(line):
-            if seat == 'L':
-                adjacents = get_adjacents2(old_map, i, k)
-                if '#' not in adjacents:
-                    new_map[i] = new_map[i][0:k] + '#' + new_map[i][k+1: ]
-            elif seat == '#':
-                adjacents = get_adjacents2(old_map, i, k)
-                if adjacents.count('#') >= 5:
-                    new_map[i] = new_map[i][0:k] + 'L' + new_map[i][k+1: ]
 
 
 with open("day11_input.txt", 'r') as file:
@@ -299,19 +292,17 @@ with open("day11_input.txt", 'r') as file:
     input = [line.rstrip('\n') for line in input]
     old_map = input.copy()
     new_map = input.copy()
-    counter = 0
-    # go through map, update seats accordingly
+    # The code here is the same as part one. The only difference is in 
+    # the function to get the adjacent seats.
     while True:
-        update_map2(old_map)
+        update_map(old_map)
         if new_map == old_map:
             break
         old_map = new_map.copy()
-        counter += 1
 
     # go through current map to count number of '#'
     occupied = 0
     for line in new_map:
         occupied += line.count('#')
     print(occupied)
-    print(counter)
 
