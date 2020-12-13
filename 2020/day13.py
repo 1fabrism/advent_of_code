@@ -147,6 +147,13 @@ with open("day13_input.txt",'r') as file:
     timestamp = 0
     multiples = []
     mods = []
+    # For part 2, simply looping through every index will take forever, so we can
+    # skip to the next multiple of whichever bus IDs already match our goal.
+    # For example, if mod 7 and mod 13 of the current timestamp and timestamp+1 
+    # respectively are already zero, but the remainders of the other bus IDs aren't,
+    # instead of going to timestamp+1 and repeating the process we can go to 
+    # timestamp+(7*13). As each new bus_ID reaches a remainder of zero, that bus ID
+    # is added to that multiplier (timestamp+(7*13*19*...)), gaining us loads of time.
     while True:
         for index,bus in enumerate(bus_IDs):
             remainder = (timestamp+index)%bus
