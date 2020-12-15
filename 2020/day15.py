@@ -46,18 +46,19 @@ Your puzzle answer was 758.
 # PART 1:
 input = [2,20,0,4,1,17]
 memory = dict()
-# Speak the starting numbers:
+# First, speak the starting numbers:
 for i,n in enumerate(input):
-    memory[str(n)] = i+1
+    memory[n] = i+1
+# Continue the game:
 number = 0
 round = len(input)+1
 while round != 2020:
-    if str(number) not in memory.keys():
-        memory[str(number)] = round
+    if number not in memory.keys():
+        memory[number] = round
         number = 0
     else:
-        difference = round - memory[str(number)]
-        memory[str(number)] = round
+        difference = round - memory[number]
+        memory[number] = round
         number = difference
     round += 1
 print(number)
@@ -85,18 +86,19 @@ Your puzzle answer was 814.
 # PART 2:
 input = [2,20,0,4,1,17]
 memory = dict()
-# Speak the starting numbers:
+# First, speak the starting numbers:
 for i,n in enumerate(input):
-    memory[str(n)] = i+1
+    memory[n] = i+1
+# Continue the game:
 number = 0
 round = len(input)+1
 while round != 30000000:
-    if str(number) not in memory.keys():
-        memory[str(number)] = round
+    if number not in memory.keys():
+        memory[number] = round
         number = 0
     else:
-        difference = round - memory[str(number)]
-        memory[str(number)] = round
+        difference = round - memory[number]
+        memory[number] = round
         number = difference
     round += 1
 print(number)
