@@ -84,7 +84,31 @@ with open("day16_input.txt",'r') as file:
 
 
 """
+--- Part Two ---
 
+Now that you've identified which tickets contain invalid values, discard those tickets entirely. Use the remaining valid tickets to determine which field is which.
+
+Using the valid ranges for each field, determine what order the fields appear on the tickets. The order is consistent between all tickets: if seat is the third field, it is the third field on every ticket, including your ticket.
+
+For example, suppose you have the following notes:
+
+class: 0-1 or 4-19
+row: 0-5 or 8-19
+seat: 0-13 or 16-19
+
+your ticket:
+11,12,13
+
+nearby tickets:
+3,9,18
+15,1,5
+5,14,9
+
+Based on the nearby tickets in the above example, the first position must be row, the second position must be class, and the third position must be seat; you can conclude that in your ticket, class is 12, row is 11, and seat is 13.
+
+Once you work out which field is which, look for the six fields on your ticket that start with the word departure. What do you get if you multiply those six values together?
+
+Your puzzle answer was 1515506256421.
 """
 
 # PART 2:
@@ -126,26 +150,34 @@ with open("day16_input.txt",'r') as file:
     for ticket in invalid_tickets:
         nearby_tickets.remove(ticket)
     
-    # Create list of possibilities for each index:
+    # Create list of possibilities for each index. Use list of sets instead of
+    # list of lists for ease of computation later on:
     possibilities = []
     for i in range(len(myticket)):
         possibilities.append(set(rules.keys()))
     
     # Remove possibilities if ticket field value is not in correct range for each possible field
-    for ticket in nearby_tickets:
-        for ticket_field_index,ticket_field_value in enumerate(ticket):
-            possibilities[ticket_field_index] = set([f_name for f_name in possibilities[ticket_field_index] if ticket_field_value in rules[f_name]])
+    for ticket_field_index in range(len(myticket)):
+        for ticket in nearby_tickets:
+            for field_name,field_range in rules.items():
+                if ticket[ticket_field_index] not in field_range:
+                    possibilities[ticket_field_index].remove(field_name)
+
+    # Sort list of set by length to make later computations easier, however we want
+    # to remember the original order because the indexes are important...
+    posscopy=possibilities.copy()
+    possibilities.sort(key=len)
 
     # Intersect sets of possibilities with each other so that each field index has only 1 possible
     # corresponding field
-    possibilities.sort()
     for i,p in enumerate(possibilities):
         for k,other_p in  enumerate(possibilities[i+1:],i+1):
             possibilities[k] = other_p - p
+            posscopy[posscopy.index(other_p)] = other_p - p
     
     # Calculate problem output
     output = 1
-    for i,s in enumerate(possibilities):
+    for i,s in enumerate(posscopy):
         if list(s)[0].startswith('departure'):
             output *= myticket[i]
     print(output)
